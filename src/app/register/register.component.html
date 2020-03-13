@@ -4,7 +4,11 @@
       <div class="card card-signin flex-row my-5">
         <div class="card-body">
           <h5 class="card-title text-center">Register</h5>
-          <form class="form-signin">
+          <form
+            class="form-signin"
+            [formGroup]="signupForm"
+            (ngSubmit)="registerUser()"
+          >
             <div class="form-label-group">
               <input
                 type="text"
@@ -13,6 +17,7 @@
                 placeholder="Username"
                 required
                 autofocus
+                formControlName="name"
               />
             </div>
 
@@ -23,6 +28,7 @@
                 class="form-control"
                 placeholder="Email address"
                 required
+                formControlName="email"
               />
             </div>
 
@@ -35,6 +41,7 @@
                 class="form-control"
                 placeholder="Password"
                 required
+                formControlName="password"
               />
             </div>
 
@@ -45,6 +52,7 @@
                 class="form-control"
                 placeholder="Confirm Password"
                 required
+                formControlName="confpassword"
               />
             </div>
 

@@ -1,1 +1,26 @@
-<p>user-product-list works!</p>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12">
+      <table class="table table-light">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Product Name</th>
+            <th scope="col">Price</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of products">
+            <th scope="row">#</th>
+            <td>{{ product.name }}</td>
+            <td>${{ product.price }}</td>
+            <td>{{ product.quantity }}</td>
+            <td><button type="button" class="btn btn-warning">Edit</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

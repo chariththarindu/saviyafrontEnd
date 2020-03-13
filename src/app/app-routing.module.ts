@@ -1,3 +1,5 @@
+import { AuthGuard } from "./service/auth.guard";
+import { ProductDetailComponent } from "./product-detail/product-detail.component";
 import { NgModule, Component } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
 import { UserProductEditComponent } from "./user-product-edit/user-product-edit.component";
@@ -7,6 +9,10 @@ import { LoginComponent } from "./login/login.component";
 import { RegisterComponent } from "./register/register.component";
 
 const routes: Routes = [
+  {
+    path: " ",
+    component: HomeComponent
+  },
   {
     path: "home",
     component: HomeComponent
@@ -21,7 +27,8 @@ const routes: Routes = [
   },
   {
     path: "product/add",
-    component: UserProductEditComponent
+    component: UserProductEditComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "product/:id",
@@ -31,6 +38,11 @@ const routes: Routes = [
     path: "products",
     component: UserProductListComponent
   },
+  {
+    path: "product-detail",
+    component: ProductDetailComponent
+  },
+
   { path: "**", redirectTo: "/home" }
 ];
 
