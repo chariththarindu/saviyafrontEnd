@@ -1,3 +1,4 @@
+import { FileResponse } from "../model/fileResponse.model";
 import { AuthService } from "./../service/auth.service";
 import { ProductService } from "./../service/product.service";
 import { Component, OnInit } from "@angular/core";
@@ -12,11 +13,13 @@ import { ActivatedRoute } from "@angular/router";
   styleUrls: ["./user-product-edit.component.css"]
 })
 export class UserProductEditComponent implements OnInit {
+  fileArray: FileResponse[];
   fileData: File = null;
   previewUrl: any = null;
   fileUploadProgress: string = null;
   uploadedFilePath: string = null;
-  adapter = new ImageFilePickerAdapter(this.http);
+  imageMap = new Map<string, FileResponse>();
+  adapter = new ImageFilePickerAdapter(this.http, this.imageMap);
   constructor(
     private productService: ProductService,
     private http: HttpClient,
@@ -26,6 +29,7 @@ export class UserProductEditComponent implements OnInit {
 
   ngOnInit() {
     this.resetForm();
+    this.imageMap.clear();
   }
 
   resetForm(form?: NgForm) {
@@ -42,9 +46,9 @@ export class UserProductEditComponent implements OnInit {
   onSubmit(form: NgForm) {
     this.insertProduct(form);
     const formData = new FormData();
-    formData.append("file", this.fileData);
+    // formData.append("file", this.fileData);
 
-    this.fileUploadProgress = "0%";
+    // this.fileUploadProgress = "0%";
 
     // const httpOptions = {
     //   headers: new HttpHeaders({
@@ -53,32 +57,31 @@ export class UserProductEditComponent implements OnInit {
     //       "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3ODhlYjljNS1jZTU2LTRlNWEtODI1Ni0wNGM5NjE1ODgyYzMiLCJleHAiOjE1ODMxMjkzNTV9._RScADYjKGzhYJfgfpBpPBwMxbO5ywd1aeARkZQClZ9k9ldHuVdwbNWVLkeTq5y5NJvye1h49HxOXPDoE8jXUw"
     //   })
     // };
-
-    this.http
-      .post(
-        "http://localhost:8020/v1/saviya/upload/productImageUpload",
-        formData,
-        {
-          headers: new HttpHeaders({
-            "Content-Type": "multipart/form-data",
-            Authorization:
-              "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3ODhlYjljNS1jZTU2LTRlNWEtODI1Ni0wNGM5NjE1ODgyYzMiLCJleHAiOjE1ODMxMjkzNTV9._RScADYjKGzhYJfgfpBpPBwMxbO5ywd1aeARkZQClZ9k9ldHuVdwbNWVLkeTq5y5NJvye1h49HxOXPDoE8jXUw"
-          }),
-          reportProgress: true,
-          observe: "events"
-        }
-      )
-      .subscribe(events => {
-        if (events.type === HttpEventType.UploadProgress) {
-          this.fileUploadProgress =
-            Math.round((events.loaded / events.total) * 100) + "%";
-          console.log(this.fileUploadProgress);
-        } else if (events.type === HttpEventType.Response) {
-          this.fileUploadProgress = "";
-          console.log(events.body);
-          alert("SUCCESS !!");
-        }
-      });
+    // console.log("before upload....");
+    // this.http
+    //   .post(
+    //     "http://localhost:8020/v1/saviya/upload/productImageUpload",
+    //     formData,
+    //     {
+    //       headers: new HttpHeaders({
+    //         "Content-Type": "multipart/form-data"
+    //       }),
+    //       reportProgress: true,
+    //       observe: "events"
+    //     }
+    //   )
+    //   .subscribe(events => {
+    //     if (events.type === HttpEventType.UploadProgress) {
+    //       this.fileUploadProgress =
+    //         Math.round((events.loaded / events.total) * 100) + "%";
+    //       console.log(this.fileUploadProgress);
+    //     } else if (events.type === HttpEventType.Response) {
+    //       this.fileUploadProgress = "";
+    //       console.log("success upload ");
+    //       console.log(events.body);
+    //       alert("SUCCESS !!");
+    //     }
+    //   });
   }
 
   insertProduct(form: NgForm) {

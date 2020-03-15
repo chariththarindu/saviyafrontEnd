@@ -9,23 +9,25 @@ import {
 import { map } from "rxjs/operators";
 import { Observable } from "rxjs";
 import { FilePickerAdapter } from "ngx-awesome-uploader";
+import { FileResponse } from "./model/fileResponse.model";
 
 export class ImageFilePickerAdapter extends FilePickerAdapter {
-  constructor(private http: HttpClient) {
+  private baseUrl = "http://localhost:8020/v1/saviya/upload/productImageUpload";
+  constructor(
+    private http: HttpClient,
+    private imageMap: Map<string, FileResponse>
+  ) {
     super();
   }
   public uploadFile(fileItem: FilePreviewModel) {
     const httpOptions = {
       headers: new HttpHeaders({
-        "Content-Type": "undefined",
-        Authorization:
-          "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3ODhlYjljNS1jZTU2LTRlNWEtODI1Ni0wNGM5NjE1ODgyYzMiLCJleHAiOjE1ODMxMjkzNTV9._RScADYjKGzhYJfgfpBpPBwMxbO5ywd1aeARkZQClZ9k9ldHuVdwbNWVLkeTq5y5NJvye1h49HxOXPDoE8jXUw"
+        "Content-Type": "multipart/form-data"
       })
     };
     const form = new FormData();
     form.append("file", fileItem.file);
     const api = "http://localhost:8020/v1/saviya/upload/productImageUpload";
-    //const api = "https://demo-file-uploader.free.beeceptor.com";
     const req = new HttpRequest("POST", api, form, {
       headers: new HttpHeaders({
         Authorization:
@@ -34,9 +36,19 @@ export class ImageFilePickerAdapter extends FilePickerAdapter {
       reportProgress: true
     });
     return this.http.request(req).pipe(
-      map((res: HttpEvent<any>) => {
+      map((res: HttpEvent<FileResponse>) => {
         if (res.type === HttpEventType.Response) {
-          return res.body.id.toString();
+          console.log("success response .......");
+          console.log(res.body);
+          this.imageMap.set(res.body.uploadId, res.body);
+          for (let entry of this.imageMap.entries()) {
+            console.log(
+              "key:-" + entry[0],
+              "Object value 1 :-" + entry[1].uploadId,
+              entry[1].url
+            );
+          }
+          return res.body.uploadId.toString();
         } else if (res.type === HttpEventType.UploadProgress) {
           // Compute and show the % done:
           const UploadProgress = +Math.round((100 * res.loaded) / res.total);
@@ -45,8 +57,11 @@ export class ImageFilePickerAdapter extends FilePickerAdapter {
       })
     );
   }
-  public removeFile(fileItem): Observable<any> {
-    const removeApi = "https://file-remove-demo.free.beeceptor.com";
-    return this.http.post(removeApi, {});
+  public removeFile(fileItem: FilePreviewModel): Observable<any> {
+    console.log("file remove starts... map size " + this.imageMap.size);
+    console.log(fileItem);
+
+    this.imageMap.delete(fileItem.fileId);
+    return this.http.delete(`${this.baseUrl}/${fileItem.fileId}`, {});
   }
 }
