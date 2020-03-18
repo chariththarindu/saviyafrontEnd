@@ -1,11 +1,13 @@
+import { FilePreviewModel } from "ngx-awesome-uploader";
 import { FileResponse } from "../model/fileResponse.model";
 import { AuthService } from "./../service/auth.service";
 import { ProductService } from "./../service/product.service";
 import { Component, OnInit } from "@angular/core";
-import { NgForm } from "@angular/forms";
-import { HttpClient, HttpEventType, HttpHeaders } from "@angular/common/http";
+import { NgForm, FormGroup, FormBuilder } from "@angular/forms";
+import { HttpClient, HttpEvent, HttpEventType } from "@angular/common/http";
 import { ImageFilePickerAdapter } from "../image-file-picker.adapter";
 import { ActivatedRoute } from "@angular/router";
+import { Product } from "../model/product.model";
 
 @Component({
   selector: "app-user-product-edit",
@@ -13,99 +15,103 @@ import { ActivatedRoute } from "@angular/router";
   styleUrls: ["./user-product-edit.component.css"]
 })
 export class UserProductEditComponent implements OnInit {
-  fileArray: FileResponse[];
-  fileData: File = null;
-  previewUrl: any = null;
-  fileUploadProgress: string = null;
-  uploadedFilePath: string = null;
+  // fileData: File = null;
+  // previewUrl: any = null;
+  // fileUploadProgress: string = null;
+  // uploadedFilePath: string = null;
+  form: FormGroup;
+  progress: number = 0;
+  imgSet = new Set<FilePreviewModel>();
   imageMap = new Map<string, FileResponse>();
-  adapter = new ImageFilePickerAdapter(this.http, this.imageMap);
+  adapter = new ImageFilePickerAdapter(this.http, this.imageMap, this.imgSet);
   constructor(
     private productService: ProductService,
     private http: HttpClient,
     public authSerive: AuthService,
+    public fb: FormBuilder,
     private actRoute: ActivatedRoute
-  ) {}
-
-  ngOnInit() {
-    this.resetForm();
-    this.imageMap.clear();
-  }
-
-  resetForm(form?: NgForm) {
-    if (form != null) form.resetForm();
-    this.productService.formData = {
-      businessId: null,
-      description: null,
-      categoryId: null,
-      name: null,
-      status: null
-    };
-  }
-
-  onSubmit(form: NgForm) {
-    this.insertProduct(form);
-    const formData = new FormData();
-    // formData.append("file", this.fileData);
-
-    // this.fileUploadProgress = "0%";
-
-    // const httpOptions = {
-    //   headers: new HttpHeaders({
-    //     "Content-Type": "multipart/form-data",
-    //     Authorization:
-    //       "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3ODhlYjljNS1jZTU2LTRlNWEtODI1Ni0wNGM5NjE1ODgyYzMiLCJleHAiOjE1ODMxMjkzNTV9._RScADYjKGzhYJfgfpBpPBwMxbO5ywd1aeARkZQClZ9k9ldHuVdwbNWVLkeTq5y5NJvye1h49HxOXPDoE8jXUw"
-    //   })
-    // };
-    // console.log("before upload....");
-    // this.http
-    //   .post(
-    //     "http://localhost:8020/v1/saviya/upload/productImageUpload",
-    //     formData,
-    //     {
-    //       headers: new HttpHeaders({
-    //         "Content-Type": "multipart/form-data"
-    //       }),
-    //       reportProgress: true,
-    //       observe: "events"
-    //     }
-    //   )
-    //   .subscribe(events => {
-    //     if (events.type === HttpEventType.UploadProgress) {
-    //       this.fileUploadProgress =
-    //         Math.round((events.loaded / events.total) * 100) + "%";
-    //       console.log(this.fileUploadProgress);
-    //     } else if (events.type === HttpEventType.Response) {
-    //       this.fileUploadProgress = "";
-    //       console.log("success upload ");
-    //       console.log(events.body);
-    //       alert("SUCCESS !!");
-    //     }
-    //   });
-  }
-
-  insertProduct(form: NgForm) {
-    this.productService.createProduct(form.value).subscribe(res => {
-      this.resetForm(form);
+  ) {
+    this.form = this.fb.group({
+      name: [""],
+      categoryId: [""],
+      description: [""],
+      avatar: [null]
     });
   }
 
-  fileProgress(fileInput: any) {
-    this.fileData = <File>fileInput.target.files[0];
-    this.preview();
+  ngOnInit() {
+    this.resetForm();
   }
 
-  preview() {
-    // Show preview
-    var mimeType = this.fileData.type;
-    if (mimeType.match(/image\/*/) == null) {
-      return;
+  resetForm(form?: NgForm) {
+    if (form != null) {
+      form.resetForm();
     }
+    this.productService.formData = new Product();
+    this.adapter = new ImageFilePickerAdapter(
+      this.http,
+      this.imageMap,
+      this.imgSet
+    );
+  }
 
-    var reader = new FileReader();
-    reader.readAsDataURL(this.fileData);
-    reader.onload = _event => {
-      this.previewUrl = reader.result;
-    };
+  onSubmit(form: NgForm) {
+    console.log("adding product....");
+    console.log(form);
+    this.insertProduct(form);
+    const formData = new FormData();
+    this.adapter = new ImageFilePickerAdapter(
+      this.http,
+      this.imageMap,
+      this.imgSet
+    );
+  }
+
+  insertProduct(form: NgForm) {
+    console.log("map size before inserting :-" + this.imageMap.size);
+    this.productService
+      .createProduct(form.value, this.imageMap)
+      .subscribe(res => {
+        this.resetForm(form);
+        for (let entry of this.imgSet.entries()) {
+          this.adapter.removeFile(entry[0]);
+        }
+      });
+  }
+  uploadFile(event) {
+    const file = (event.target as HTMLInputElement).files[0];
+
+    for (var item in (event.target as HTMLInputElement).files) {
+      console.log((event.target as HTMLInputElement).files[item]);
+    }
+    this.form.patchValue({
+      avatar: file
+    });
+    this.form.get("avatar").updateValueAndValidity();
+  }
+
+  submitUser() {
+    console.log(this.form);
+    this.productService
+      .fileUpload(this.form.value.avatar)
+      .subscribe((event: HttpEvent<any>) => {
+        switch (event.type) {
+          case HttpEventType.Sent:
+            console.log("Request has been made!");
+            break;
+          case HttpEventType.ResponseHeader:
+            console.log("Response header has been received!");
+            break;
+          case HttpEventType.UploadProgress:
+            this.progress = Math.round((event.loaded / event.total) * 100);
+            console.log(`Uploaded! ${this.progress}%`);
+            break;
+          case HttpEventType.Response:
+            console.log("User successfully created!", event.body);
+            setTimeout(() => {
+              this.progress = 0;
+            }, 1500);
+        }
+      });
   }
 }

@@ -15,7 +15,8 @@ export class ImageFilePickerAdapter extends FilePickerAdapter {
   private baseUrl = "http://localhost:8020/v1/saviya/upload/productImageUpload";
   constructor(
     private http: HttpClient,
-    private imageMap: Map<string, FileResponse>
+    private imageMap: Map<string, FileResponse>,
+    private imgset: Set<FilePreviewModel>
   ) {
     super();
   }
@@ -48,6 +49,8 @@ export class ImageFilePickerAdapter extends FilePickerAdapter {
               entry[1].url
             );
           }
+          this.imgset.add(fileItem);
+
           return res.body.uploadId.toString();
         } else if (res.type === HttpEventType.UploadProgress) {
           // Compute and show the % done:
@@ -62,6 +65,7 @@ export class ImageFilePickerAdapter extends FilePickerAdapter {
     console.log(fileItem);
 
     this.imageMap.delete(fileItem.fileId);
+    this.imgset.delete(fileItem);
     return this.http.delete(`${this.baseUrl}/${fileItem.fileId}`, {});
   }
 }
