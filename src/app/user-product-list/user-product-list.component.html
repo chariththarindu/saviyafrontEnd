@@ -6,8 +6,8 @@
           <tr>
             <th scope="col"></th>
             <th scope="col">Product Name</th>
-            <th scope="col">Price</th>
-            <th scope="col">Quantity</th>
+            <th scope="col">Product Category</th>
+            <th scope="col">Product Description</th>
             <th scope="col">Edit</th>
           </tr>
         </thead>
@@ -15,9 +15,17 @@
           <tr *ngFor="let product of products">
             <th scope="row">#</th>
             <td>{{ product.name }}</td>
-            <td>${{ product.price }}</td>
-            <td>{{ product.quantity }}</td>
-            <td><button type="button" class="btn btn-warning">Edit</button></td>
+            <td>${{ product.categoryId }}</td>
+            <td>{{ product.description }}</td>
+            <!-- <td><button type="button" class="btn btn-warning">Edit</button></td> -->
+            <td>
+              <a
+                [routerLink]="['/product/edit', product.uuid]"
+                class="btn btn-primary"
+                >Edit</a
+              >
+            </td>
+            <td><a [routerLink]="" class="btn btn-danger">Delete</a></td>
           </tr>
         </tbody>
       </table>

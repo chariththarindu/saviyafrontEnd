@@ -1,3 +1,4 @@
+import { PublicSearchService } from "./service/public-search.service";
 import { AuthInterceptor } from "./service/authconfig.interceptor";
 import { ProductService } from "./service/product.service";
 import { BrowserModule } from "@angular/platform-browser";
@@ -16,6 +17,9 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { FooterComponent } from "./footer/footer.component";
 import { ProductDetailComponent } from "./product-detail/product-detail.component";
 import { FilePickerModule } from "ngx-awesome-uploader";
+import { UserProductAddComponent } from "./user-product-add/user-product-add.component";
+import { ProductInfoComponent } from './user-product-edit/product-info/product-info.component';
+import { ProductImageComponent } from './user-product-edit/product-image/product-image.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +31,10 @@ import { FilePickerModule } from "ngx-awesome-uploader";
     UserProductListComponent,
     HomeComponent,
     FooterComponent,
-    ProductDetailComponent
+    ProductDetailComponent,
+    UserProductAddComponent,
+    ProductInfoComponent,
+    ProductImageComponent
   ],
   imports: [
     BrowserModule,
@@ -43,7 +50,8 @@ import { FilePickerModule } from "ngx-awesome-uploader";
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
-    }
+    },
+    PublicSearchService
   ],
   bootstrap: [AppComponent]
 })

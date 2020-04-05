@@ -7,6 +7,7 @@ import { HomeComponent } from "./home/home.component";
 import { UserProductListComponent } from "./user-product-list/user-product-list.component";
 import { LoginComponent } from "./login/login.component";
 import { RegisterComponent } from "./register/register.component";
+import { UserProductAddComponent } from "./user-product-add/user-product-add.component";
 
 const routes: Routes = [
   {
@@ -27,12 +28,14 @@ const routes: Routes = [
   },
   {
     path: "product/add",
-    component: UserProductEditComponent,
+    component: UserProductAddComponent,
     canActivate: [AuthGuard]
   },
+
   {
-    path: "product/:id",
-    component: UserProductEditComponent
+    path: "product/edit/:id",
+    component: UserProductEditComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "products",

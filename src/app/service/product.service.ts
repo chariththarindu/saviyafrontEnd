@@ -4,48 +4,109 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { FileResponse } from "../model/fileResponse.model";
 import { Observable, throwError } from "rxjs";
-import { catchError } from "rxjs/operators";
+import { catchError, map } from "rxjs/operators";
+import { FormGroup } from "@angular/forms";
 
 @Injectable({
-  providedIn: "root"
+  providedIn: "root",
 })
 export class ProductService {
   formData: Product;
   readonly rootUrl = "http://localhost:8020/v1/saviya";
 
+  options: any = {
+    json: true,
+  };
+
   constructor(private http: HttpClient) {}
 
-  createProduct(formData: Product, imgMap: Map<string, FileResponse>) {
-    const list = new Array<FileResponse>();
-
-    for (let entry of imgMap.entries()) {
-      console.log("test:- " + entry[0], entry[1]);
-      const fileResponse = new FileResponse();
-      fileResponse.uploadId = entry[1].uploadId;
-      fileResponse.url = entry[1].url;
-      //formData.productImageList.set(entry[0], fileResponse);
-      list.push(fileResponse);
-    }
-
-    formData.imgList = list;
-    return this.http.post(this.rootUrl + "/business", formData);
+  getProducts() {
+    return this.http.get(this.rootUrl + "/business/product");
   }
 
-  fileUpload(profileImage: File): Observable<any> {
-    var formData: any = new FormData();
-    // formData.append("name", name);
-    formData.append("file", profileImage);
+  getProductByUUID(uuid: String) {
+    console.log(" product uuid:-" + uuid);
+    return this.http
+      .get(`${this.rootUrl}/business/product/${uuid}`, this.options)
+      .pipe(
+        map((data: any) => {
+          return data;
+        }),
+        catchError((error) => {
+          return throwError("Something went wrong!");
+        })
+      );
+  }
 
+  createProduct(formData: FormData): Observable<any> {
+    console.log("inside file upload servvice");
+    return this.http
+      .post(this.rootUrl + "/business/product", formData, {
+        reportProgress: true,
+        observe: "events",
+      })
+      .pipe(catchError(this.errorMgmt));
+  }
+
+  updateProduct(product: Product): Observable<any> {
+    console.log("inside product update service");
+    return this.http
+      .put(this.rootUrl + "/business/product", product)
+      .pipe(catchError(this.errorMgmt));
+  }
+
+  deleteProductByProductUUID(uuid: string) {
+    return this.http
+      .delete(`${this.rootUrl}/business/product/${uuid}`)
+      .pipe(catchError(this.errorMgmt));
+  }
+
+  uploadSingleFile(formData: FormData, prodUID: string): Observable<any> {
     return this.http
       .post(
-        "http://localhost:8020/v1/saviya/upload/productImageUpload",
+        `${this.rootUrl}/business/product/${prodUID}/productImage`,
         formData,
         {
           reportProgress: true,
-          observe: "events"
+          observe: "events",
         }
       )
       .pipe(catchError(this.errorMgmt));
+  }
+
+  deleteSingleFile(fileuid: string) {
+    return this.http
+      .delete(`${this.rootUrl}/business/productImage/${fileuid}`)
+      .pipe(catchError(this.errorMgmt));
+  }
+
+  getProductImagesByProductUUID(uuid: String) {
+    console.log(" product uuid:-" + uuid);
+
+    return this.http
+      .get(
+        `${this.rootUrl}/business/product/${uuid}/productImage`,
+        this.options
+      )
+      .pipe(
+        map((data: any) => {
+          return data;
+        }),
+        catchError((error) => {
+          return throwError("Something went wrong!");
+        })
+      );
+  }
+
+  getProductCategories() {
+    return this.http
+      .get(`${this.rootUrl}/business/category`, this.options)
+      .pipe(
+        map((data: any) => {
+          return data;
+        }),
+        catchError(this.errorMgmt)
+      );
   }
 
   errorMgmt(error: HttpErrorResponse) {

@@ -131,7 +131,9 @@
 
       <div class="col-lg-8 col-md-8 col-sm-12">
         <ul class="list-group shadow">
-          <li class="list-group-item">
+          <li class="list-group-item" *ngFor="let product of productList">
+            {{ product.description }}
+
             <div style="text-align: right;">
               <a href="moreInfo">more info</a>
             </div>
@@ -168,7 +170,7 @@
                 </div>
               </div>
               <img
-                src="https://res.cloudinary.com/mhmd/image/upload/v1556485076/shoes-1_gthops.jpg"
+                src="{{ product.images[0].url }}"
                 alt="Generic placeholder image"
                 width="200"
                 class="ml-lg-5 order-1 order-lg-2"
@@ -177,9 +179,7 @@
             <!-- End -->
           </li>
 
-          <!--  new item -->
-
-          <li class="list-group-item">
+          <!-- <li class="list-group-item">
             <div style="text-align: right;">
               <a href="moreInfo">more info</a>
             </div>
@@ -222,8 +222,8 @@
                 class="ml-lg-5 order-1 order-lg-2"
               />
             </div>
-            <!-- End -->
-          </li>
+          
+          </li> -->
         </ul>
       </div>
     </div>
